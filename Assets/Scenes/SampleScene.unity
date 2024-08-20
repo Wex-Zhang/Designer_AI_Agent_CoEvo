@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18018535, g: 0.22559482, b: 0.30677685, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -7858,6 +7858,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 587319693}
+  - component: {fileID: 587319694}
   m_Layer: 5
   m_Name: AgentInfoElement3
   m_TagString: Untagged
@@ -7896,6 +7897,25 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: -80.2}
   m_SizeDelta: {x: 1860, y: 263.9}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &587319694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587319692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 066cc166859f3c14ca2bde36c8f3200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputFields:
+  - {fileID: 1268009763}
+  - {fileID: 73408496}
+  - {fileID: 1331377799}
+  - {fileID: 1325321300}
+  - {fileID: 1013795175}
+  agentIndex: 2
 --- !u!1 &587537623
 GameObject:
   m_ObjectHideFlags: 0
@@ -19310,6 +19330,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1653184727}
+  - component: {fileID: 1653184728}
   m_Layer: 5
   m_Name: AgentInfoElement1
   m_TagString: Untagged
@@ -19348,6 +19369,25 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: 439}
   m_SizeDelta: {x: 1860, y: 263.9}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &1653184728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1653184726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 066cc166859f3c14ca2bde36c8f3200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputFields:
+  - {fileID: 451882860}
+  - {fileID: 952288535}
+  - {fileID: 282163693}
+  - {fileID: 283526934}
+  - {fileID: 629500548}
+  agentIndex: 0
 --- !u!1 &1656662832
 GameObject:
   m_ObjectHideFlags: 0
@@ -22223,6 +22263,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1929404905}
+  - component: {fileID: 1929404906}
   m_Layer: 5
   m_Name: AgentInfoElement2
   m_TagString: Untagged
@@ -22261,6 +22302,25 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: 178.7}
   m_SizeDelta: {x: 1860, y: 263.9}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &1929404906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1929404904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 066cc166859f3c14ca2bde36c8f3200b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputFields:
+  - {fileID: 421917218}
+  - {fileID: 1888397641}
+  - {fileID: 198534614}
+  - {fileID: 148738758}
+  - {fileID: 771263626}
+  agentIndex: 1
 --- !u!1 &1999215675
 GameObject:
   m_ObjectHideFlags: 0
