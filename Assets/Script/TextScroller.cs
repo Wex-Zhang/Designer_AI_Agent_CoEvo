@@ -11,14 +11,41 @@ public class TextScroller : MonoBehaviour
     public GameObject contentPanel;
     public GameObject textPrefab; // Assign this in the Inspector, it should be the TextContent object.
     public ScrollRect scrollRect; // Assign the ScrollRect component here in the Inspector.
+    public GameObject viewPortController; // Assign the sphere (viewPortController) here in the Inspector.
 
     private List<string> proposals = new List<string>();
     private int currentProposalIndex = 0;
     private int wordsPerUpdate = 10;
+    private bool isLoaded = false; // To ensure proposals are loaded only once
 
     void Start()
     {
-        StartCoroutine(LoadProposals());
+        // Ensure viewPortController is not null
+        if (viewPortController != null)
+        {
+            // Add an event listener for the mouse click on the viewPortController
+            viewPortController.AddComponent<SphereCollider>().isTrigger = true; // Ensure it has a collider
+        }
+    }
+
+    void Update()
+    {
+        // Check if the viewPortController is clicked
+        if (Input.GetMouseButtonDown(0)) // 0 is for left-click
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                // Check if the hit object is the viewPortController
+                if (hit.collider.gameObject == viewPortController && !isLoaded)
+                {
+                    StartCoroutine(LoadProposals());
+                    isLoaded = true; // Ensure it only loads once
+                }
+            }
+        }
     }
 
     IEnumerator LoadProposals()
@@ -27,7 +54,7 @@ public class TextScroller : MonoBehaviour
         string path = Path.Combine(Application.dataPath, jsonFilePath);
         string jsonData = File.ReadAllText(path);
         JObject data = JObject.Parse(jsonData);
-        
+
         // Extract proposals
         foreach (var round in data["runtime"])
         {
@@ -37,15 +64,18 @@ public class TextScroller : MonoBehaviour
                 proposals.Add(proposalText);
             }
         }
-        
-        // Start updating the text content every 5 seconds
+
+        // Start updating the text content: first line after 3 seconds, then every 5 seconds
         StartCoroutine(UpdateTextContent());
-        
+
         yield return null;
     }
 
     IEnumerator UpdateTextContent()
     {
+        // Wait for 3 seconds before showing the first line
+        yield return new WaitForSeconds(3f);
+
         while (currentProposalIndex < proposals.Count)
         {
             // Fetch the next portion of text
@@ -64,6 +94,8 @@ public class TextScroller : MonoBehaviour
 
             // Update the proposal index
             currentProposalIndex++;
+
+            // Wait 5 seconds before displaying the next text
             yield return new WaitForSeconds(5f);
         }
     }

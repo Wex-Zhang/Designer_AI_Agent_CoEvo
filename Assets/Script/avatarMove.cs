@@ -3,9 +3,10 @@ using UnityEngine.AI;
 
 public class CharacterMovement : MonoBehaviour
 {
-    public Vector3 pointA = new Vector3(0, 0, -5);
-    public Vector3 pointB = new Vector3(0, 0, 0);
-    public float waitTime = 8f;
+    public Vector3 pointA = new Vector3(0, 0, -5); // 原点
+    public Vector3 pointB = new Vector3(0, 0, 0); // 目标点
+    public float waitTimeAtB = 60f; // 目标点B的停留时间
+    public float waitTimeAtA = 8f;  // 原点A的停留时间
     public float speed = 3.5f;
     public Transform cube; // 目标Cube的Transform
     public float rotationSpeed = 2f; // 旋转速度
@@ -32,7 +33,7 @@ public class CharacterMovement : MonoBehaviour
         {
             // 到达目的地，开始等待
             isWaiting = true;
-            waitTimer = waitTime;
+            waitTimer = movingToPointB ? waitTimeAtB : waitTimeAtA; // 根据位置设置等待时间
             animator.SetBool("isWalking", false); // 停止行走动画
         }
 
@@ -59,3 +60,4 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 }
+
