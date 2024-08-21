@@ -17,6 +17,7 @@ public class TextScroller : MonoBehaviour
     private int currentProposalIndex = 0;
     private int wordsPerUpdate = 10;
     private bool isLoaded = false; // To ensure proposals are loaded only once
+    private int clickCount = 0; // Track the number of clicks
 
     void Start()
     {
@@ -39,12 +40,31 @@ public class TextScroller : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 // Check if the hit object is the viewPortController
-                if (hit.collider.gameObject == viewPortController && !isLoaded)
+                if (hit.collider.gameObject == viewPortController)
                 {
-                    StartCoroutine(LoadProposals());
-                    isLoaded = true; // Ensure it only loads once
+                    clickCount++; // Increment click count
+                    ToggleScrollRectVisibility(); // Toggle visibility based on click count
+
+                    if (!isLoaded)
+                    {
+                        StartCoroutine(LoadProposals());
+                        isLoaded = true; // Ensure it only loads once
+                    }
                 }
             }
+        }
+    }
+
+    void ToggleScrollRectVisibility()
+    {
+        // Show or hide ScrollRect based on the number of clicks
+        if (clickCount % 2 == 1) // Odd number of clicks
+        {
+            scrollRect.gameObject.SetActive(true);
+        }
+        else // Even number of clicks
+        {
+            scrollRect.gameObject.SetActive(false);
         }
     }
 
@@ -100,4 +120,3 @@ public class TextScroller : MonoBehaviour
         }
     }
 }
-

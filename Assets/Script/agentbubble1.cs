@@ -18,6 +18,9 @@ public class agentbubble1 : MonoBehaviour
     public List<Transform> objectsToTrack; // 每个气泡要追踪的物体
     public Vector3 offset; // 微调追踪点的偏移向量
 
+    private int clickCount = 0; // 跟踪点击次数
+    private bool areBubblesVisible = false; // 当前气泡的显示状态
+
     private void Start()
     {
         dialogueDataList = new List<DialogueData>();
@@ -25,7 +28,7 @@ public class agentbubble1 : MonoBehaviour
         {
             ReadJson(filePath);
         }
-        HideAllBubbles();
+        HideAllBubbles(); // 初始隐藏所有气泡
     }
 
     private void ReadJson(string filePath)
@@ -72,7 +75,20 @@ public class agentbubble1 : MonoBehaviour
 
     private void OnMouseDown()
     {
-        StartCoroutine(ShowDialogueSequence());
+        clickCount++; // Increment click count
+        if (clickCount % 2 == 1) // Odd number of clicks
+        {
+            if (!areBubblesVisible)
+            {
+                StartCoroutine(ShowDialogueSequence());
+                areBubblesVisible = true;
+            }
+        }
+        else // Even number of clicks
+        {
+            HideAllBubbles();
+            areBubblesVisible = false;
+        }
     }
 
     private IEnumerator ShowDialogueSequence()
