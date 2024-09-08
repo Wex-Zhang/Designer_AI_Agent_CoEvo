@@ -15,7 +15,6 @@ public class TextScroller : MonoBehaviour
 
     private List<string> proposals = new List<string>();
     private int currentProposalIndex = 0;
-    private int wordsPerUpdate = 10;
     private bool isLoaded = false; // To ensure proposals are loaded only once
     private int clickCount = 0; // Track the number of clicks
 
@@ -93,30 +92,35 @@ public class TextScroller : MonoBehaviour
 
     IEnumerator UpdateTextContent()
     {
-        // Wait for 3 seconds before showing the first line
+        // Wait for 3 seconds before showing the first proposal
         yield return new WaitForSeconds(3f);
 
         while (currentProposalIndex < proposals.Count)
         {
-            // Fetch the next portion of text
-            string[] words = proposals[currentProposalIndex].Split(' ');
-            int endIndex = Mathf.Min(words.Length, wordsPerUpdate);
-
-            string displayedText = string.Join(" ", words, 0, endIndex);
+            // Fetch the next proposal
+            string currentProposal = proposals[currentProposalIndex];
 
             // Create a new Text object in the Scroll View
             GameObject newText = Instantiate(textPrefab, contentPanel.transform);
-            newText.GetComponent<Text>().text = displayedText;
+            newText.GetComponent<Text>().text = currentProposal;
 
             // Force the ScrollRect to scroll to the bottom
             Canvas.ForceUpdateCanvases(); // Force an update to the layout before adjusting the scroll position
             scrollRect.verticalNormalizedPosition = 0f; // 0 means bottom, 1 means top
 
+            // Add blank lines after each proposal
+            GameObject blankLine1 = Instantiate(textPrefab, contentPanel.transform);
+            blankLine1.GetComponent<Text>().text = "";
+
+            GameObject blankLine2 = Instantiate(textPrefab, contentPanel.transform);
+            blankLine2.GetComponent<Text>().text = "";
+
+            // Wait 5 seconds before displaying the next proposal
+            yield return new WaitForSeconds(5f);
+
             // Update the proposal index
             currentProposalIndex++;
-
-            // Wait 5 seconds before displaying the next text
-            yield return new WaitForSeconds(5f);
         }
     }
 }
+

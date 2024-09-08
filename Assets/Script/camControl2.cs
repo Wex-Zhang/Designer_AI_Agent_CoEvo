@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI; // 引入 UI 命名空间
 
 public class CameraControl2 : MonoBehaviour
 {
     public Camera mainCamera;
     public Transform targetCube;
     public GameObject triggerSphere;
+    public Button rotateButton; // 新增：用于控制摄像机旋转的按钮
 
     private Vector3 initialPosition;
     private Quaternion initialRotation;
@@ -13,6 +15,7 @@ public class CameraControl2 : MonoBehaviour
     private Quaternion sideViewRotation;
 
     private int clickCount = 0;
+    private bool isCameraRotating = false; // 新增：控制摄像机旋转的标志
 
     void Start()
     {
@@ -23,10 +26,20 @@ public class CameraControl2 : MonoBehaviour
         // 计算侧视图的位置和旋转
         sideViewPosition = new Vector3(0.5f, 1, -4f);
         sideViewRotation = Quaternion.LookRotation(targetCube.position - sideViewPosition);
+
+        // 监听按钮点击事件
+        rotateButton.onClick.AddListener(ToggleCameraRotation); // 新增：为按钮添加点击事件
     }
 
     void Update()
     {
+        // 摄像机旋转逻辑
+        if (isCameraRotating)
+        {
+            // 让摄像机围绕 targetCube 旋转
+            mainCamera.transform.RotateAround(targetCube.position, Vector3.up, 20 * Time.deltaTime);
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -57,6 +70,12 @@ public class CameraControl2 : MonoBehaviour
                 }
             }
         }
+    }
+
+    // 切换摄像机旋转状态
+    void ToggleCameraRotation()
+    {
+        isCameraRotating = !isCameraRotating; // 切换旋转状态
     }
 
     void SetCameraPosition(Vector3 position, Quaternion rotation)
