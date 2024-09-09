@@ -20,6 +20,7 @@ public class agentbubble1 : MonoBehaviour
 
     private int clickCount = 0; // 跟踪点击次数
     private bool areBubblesVisible = false; // 当前气泡的显示状态
+    private Coroutine dialogueSequenceCoroutine; // 用于控制气泡显示的协程
 
     private void Start()
     {
@@ -76,18 +77,26 @@ public class agentbubble1 : MonoBehaviour
     private void OnMouseDown()
     {
         clickCount++; // Increment click count
+
         if (clickCount % 2 == 1) // Odd number of clicks
         {
             if (!areBubblesVisible)
             {
-                StartCoroutine(ShowDialogueSequence());
                 areBubblesVisible = true;
+                dialogueSequenceCoroutine = StartCoroutine(ShowDialogueSequence());
             }
         }
         else // Even number of clicks
         {
-            HideAllBubbles();
-            areBubblesVisible = false;
+            if (areBubblesVisible)
+            {
+                areBubblesVisible = false;
+                HideAllBubbles();
+                if (dialogueSequenceCoroutine != null)
+                {
+                    StopCoroutine(dialogueSequenceCoroutine); // 停止气泡显示的协程
+                }
+            }
         }
     }
 
@@ -96,10 +105,14 @@ public class agentbubble1 : MonoBehaviour
         for (int i = 0; i < dialogueBubbles.Count; i++)
         {
             yield return new WaitForSeconds(i == 0 ? 3f : 5f); // 第一个气泡2秒后显示，后续气泡每隔3秒显示
-            ShowBubble(i);
+            if (areBubblesVisible) // 确保只有在奇数次点击后才显示
+            {
+                ShowBubble(i);
+            }
         }
 
         yield return new WaitForSeconds(55f); // 第一个气泡出现55秒后，隐藏所有气泡
         HideAllBubbles();
+        areBubblesVisible = false; // 将状态重置
     }
 }
