@@ -2,21 +2,21 @@
   "original_topic": "Design and development of future cities",
   "agents": [
     {
-      "name": "Alex",
+      "name": "ALEX",
       "age": "22",
       "traits": "INNOVATIVE, ANALYTICAL AND URBAN PLANNER1",
-      "status": "working on a robotic project",
+      "status": "WORKING ON A ROBOTIC PROJECT",
       "initial_memory": [
-        "Alex has worked on several smart city projects across different continents.",
-        "Alex believes in the potential of technology to solve urban challenges.",
-        "Alex had a mentor who emphasized the importance of community involvement in urban planning.",
-        "Alex recently attended a conference on sustainable city development.",
-        "Alex enjoys reading about the latest advancements in renewable energy.",
-        "Alex notes the increasing integration of IoT devices in urban infrastructure.",
-        "Alex observes a trend towards mixed-use developments in major cities.",
-        "Alex finds that public opinion is often divided on the implementation of autonomous vehicles.",
-        "Alex sees the growing importance of green spaces in urban areas for residents' well-being.",
-        "Alex is concerned about the digital divide and its impact on equitable access to smart city benefits."
+        "ALEX HAS WORKED ON SEVERAL SMART CITY PROJECTS ACROSS DIFFERENT CONTINENTS.",
+        "ALEX BELIEVES IN THE POTENTIAL OF TECHNOLOGY TO SOLVE URBAN CHALLENGES.",
+        "ALEX HAD A MENTOR WHO EMPHASIZED THE IMPORTANCE OF COMMUNITY INVOLVEMENT IN URBAN PLANNING.",
+        "ALEX RECENTLY ATTENDED A CONFERENCE ON SUSTAINABLE CITY DEVELOPMENT.",
+        "ALEX ENJOYS READING ABOUT THE LATEST ADVANCEMENTS IN RENEWABLE ENERGY.",
+        "ALEX NOTES THE INCREASING INTEGRATION OF IOT DEVICES IN URBAN INFRASTRUCTURE.",
+        "ALEX OBSERVES A TREND TOWARDS MIXED-USE DEVELOPMENTS IN MAJOR CITIES.",
+        "ALEX FINDS THAT PUBLIC OPINION IS OFTEN DIVIDED ON THE IMPLEMENTATION OF AUTONOMOUS VEHICLES.",
+        "ALEX SEES THE GROWING IMPORTANCE OF GREEN SPACES IN URBAN AREAS FOR RESIDENTS' WELL-BEING.",
+        "ALEX IS CONCERNED ABOUT THE DIGITAL DIVIDE AND ITS IMPACT ON EQUITABLE ACCESS TO SMART CITY BENEFITS."
       ]
     },
     {
