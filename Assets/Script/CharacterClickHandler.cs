@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking; // 用于发送HTTP请求
+using System.Collections;
 
 public class CharacterInteraction : MonoBehaviour
 {
@@ -10,6 +12,8 @@ public class CharacterInteraction : MonoBehaviour
     public GameObject objectToDisableTwo; // 需要关闭的物体2
     public GameObject uiPanel; // 需要打开的UI界面
     public Button exitButton; // UI界面的Exit按钮
+    public Button sendButton; // 发送数据的按钮
+    public InputField inputField; // 输入框，用于获取输入文本
     public float moveSpeed = 5f; // 摄像头移动速度
     public float rotateSpeed = 5f; // 摄像头旋转速度
 
@@ -20,12 +24,15 @@ public class CharacterInteraction : MonoBehaviour
     private bool isMoving = false; // 判断摄像头是否正在移动
     private bool isMovingBack = false; // 判断摄像头是否正在移动
     private bool isPaused = false; // 判断游戏是否暂停
+    private int AgentNum = -1; // 用于区分点击的人物编号，初始为-1表示未选择
 
     void Start()
     {
         // 初始化UI界面和按钮
         uiPanel.SetActive(false);
         exitButton.onClick.AddListener(OnExitButtonClicked);
+        sendButton.onClick.AddListener(OnSendButtonClicked); // 绑定发送按钮点击事件
+        sendButton.onClick.AddListener(OnExitButtonClicked);
     }
 
     void Update()
@@ -46,6 +53,9 @@ public class CharacterInteraction : MonoBehaviour
                         originalCameraPosition = cameraTransform.position;
                         originalCameraRotation = cameraTransform.rotation;
 
+                        // 设置 AgentNum，区分点击的人物
+                        AgentNum = i;
+
                         // 计算目标位置，使人物在画面的右侧
                         Vector3 characterScreenPos = Camera.main.WorldToScreenPoint(characters[i].position);
                         float screenWidth = Screen.width;
@@ -60,6 +70,10 @@ public class CharacterInteraction : MonoBehaviour
 
                         // 开始移动摄像头
                         isMoving = true;
+
+                        // 发送初始的JSON请求，state为"input"，其他为空
+                        SendInitialRequest();
+
                         break;
                     }
                 }
@@ -83,7 +97,6 @@ public class CharacterInteraction : MonoBehaviour
 
                 // 关闭物体并打开UI界面
                 objectToDisable.SetActive(false);
-
                 uiPanel.SetActive(true);
 
                 // 暂停游戏
@@ -106,6 +119,52 @@ public class CharacterInteraction : MonoBehaviour
                 isMovingBack = false;
 
             }
+        }
+    }
+
+    // 发送初始的空JSON请求
+    void SendInitialRequest()
+    {
+        // 创建初始JSON数据
+        string jsonData = "{\"state\": \"input\", \"num\": \"" + AgentNum + "\", \"word\": \"\"}";
+
+        // 启动协程发送POST请求
+        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData));
+    }
+
+    // 当点击发送数据按钮时，发送完整的JSON数据
+    void OnSendButtonClicked()
+    {
+        // 获取InputField的文本
+        string userInput = inputField.text.Trim();
+
+        // 创建最终的JSON数据
+        string jsonData = "{\"state\": \"sent\", \"num\": \"" + AgentNum + "\", \"word\": \"" + userInput + "\"}";
+
+        // 启动协程发送POST请求
+        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData));
+    }
+
+    IEnumerator SendPostRequest(string url, string jsonData)
+    {
+        // 创建请求
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        // 发送请求并等待响应
+        yield return request.SendWebRequest();
+
+        // 处理响应
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("POST request succeeded: " + request.downloadHandler.text);
+        }
+        else
+        {
+            Debug.LogError("POST request failed: " + request.error);
         }
     }
 

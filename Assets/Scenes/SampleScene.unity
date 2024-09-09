@@ -6508,7 +6508,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &308902471
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7768,7 +7768,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &368122516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20605,6 +20605,8 @@ MonoBehaviour:
   objectToDisableTwo: {fileID: 779122423}
   uiPanel: {fileID: 1657620677}
   exitButton: {fileID: 1939850253}
+  sendButton: {fileID: 876026612}
+  inputField: {fileID: 1675990804}
   moveSpeed: 3
   rotateSpeed: 3
 --- !u!1001 &964766514
@@ -31710,7 +31712,7 @@ GameObject:
   - component: {fileID: 1657620680}
   - component: {fileID: 1657620679}
   m_Layer: 5
-  m_Name: Canvas_AgentAdjustment
+  m_Name: Canvas_AgentMemoryAdjustment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31979,7 +31981,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectB: {fileID: 303329323}
-  blinkSpeed: 0.5
+  blinkSpeed: 50
   minAlpha: 0.2
   maxAlpha: 0.7
 --- !u!114 &1675990804
@@ -37453,9 +37455,9 @@ Transform:
   - {fileID: 308902471}
   - {fileID: 295860427}
   - {fileID: 1508406221}
+  - {fileID: 368122519}
   - {fileID: 1657620678}
   - {fileID: 684096756}
-  - {fileID: 368122519}
   - {fileID: 779122424}
   - {fileID: 449998962}
   - {fileID: 1693225256}
