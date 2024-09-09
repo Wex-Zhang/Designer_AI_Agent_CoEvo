@@ -12,6 +12,9 @@ public class TextScroller : MonoBehaviour
     public GameObject textPrefab; // Assign this in the Inspector, it should be the TextContent object.
     public ScrollRect scrollRect; // Assign the ScrollRect component here in the Inspector.
     public GameObject viewPortController; // Assign the sphere (viewPortController) here in the Inspector.
+    public InputField inputField; // Assign the InputField here in the Inspector.
+    public Text placeholderText; // Assign the placeholder text here in the Inspector.
+    public Button focusButton; // Assign the Focus Button here in the Inspector.
 
     private List<string> proposals = new List<string>();
     private int currentProposalIndex = 0;
@@ -20,12 +23,26 @@ public class TextScroller : MonoBehaviour
 
     void Start()
     {
+        // Set initial placeholder text and font size
+        placeholderText.text = "Make Proposal_>";
+        placeholderText.fontSize = 80;
+
         // Ensure viewPortController is not null
         if (viewPortController != null)
         {
             // Add an event listener for the mouse click on the viewPortController
             viewPortController.AddComponent<SphereCollider>().isTrigger = true; // Ensure it has a collider
         }
+
+        // Initially hide ScrollRect and InputField
+        scrollRect.gameObject.SetActive(false);
+        inputField.gameObject.SetActive(false);
+
+        // Add an event listener for the InputField to handle Enter key submission
+        inputField.onEndEdit.AddListener(HandleUserInput);
+
+        // Add a listener for the Focus Button to start loading proposals
+        focusButton.onClick.AddListener(OnFocusButtonClick);
     }
 
     void Update()
@@ -43,28 +60,88 @@ public class TextScroller : MonoBehaviour
                 {
                     clickCount++; // Increment click count
                     ToggleScrollRectVisibility(); // Toggle visibility based on click count
-
-                    if (!isLoaded)
-                    {
-                        StartCoroutine(LoadProposals());
-                        isLoaded = true; // Ensure it only loads once
-                    }
                 }
             }
         }
     }
 
+    void HandleUserInput(string inputText)
+    {
+        // Handle the user's input when they press Enter
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            if (!string.IsNullOrEmpty(inputText))
+            {
+                // Add the user's input to the scroll rect content
+                AddTextToScrollRect(inputText);
+
+                // Clear the input field and reset the placeholder
+                inputField.text = "";
+                placeholderText.text = "Make Proposal_>";
+                inputField.placeholder.GetComponent<Text>().fontSize = 80;
+
+                // Ensure the ScrollRect scrolls to the bottom
+                ScrollToBottom();
+            }
+        }
+    }
+
+    void AddTextToScrollRect(string newText)
+    {
+        // Create a new Text object in the Scroll View for the user input
+        GameObject newTextObject = Instantiate(textPrefab, contentPanel.transform);
+        newTextObject.GetComponent<Text>().text = newText;
+
+        // Add blank lines after the new text
+        GameObject blankLine1 = Instantiate(textPrefab, contentPanel.transform);
+        blankLine1.GetComponent<Text>().text = "";
+
+        GameObject blankLine2 = Instantiate(textPrefab, contentPanel.transform);
+        blankLine2.GetComponent<Text>().text = "";
+    }
+
+    void ScrollToBottom()
+    {
+        // Force the ScrollRect to update its layout before scrolling
+        Canvas.ForceUpdateCanvases();
+
+        // Set scroll position to bottom (0f = bottom, 1f = top)
+        scrollRect.verticalNormalizedPosition = 0f;
+    }
+
     void ToggleScrollRectVisibility()
     {
-        // Show or hide ScrollRect based on the number of clicks
+        // Show or hide ScrollRect and InputField based on the number of clicks
         if (clickCount % 2 == 1) // Odd number of clicks
         {
             scrollRect.gameObject.SetActive(true);
+            inputField.gameObject.SetActive(true);
         }
         else // Even number of clicks
         {
             scrollRect.gameObject.SetActive(false);
+            inputField.gameObject.SetActive(false);
         }
+    }
+
+    void OnFocusButtonClick()
+    {
+        // Check if the proposals have already been loaded
+        if (!isLoaded)
+        {
+            StartCoroutine(DelayedLoadProposals()); // Start a coroutine that delays the loading process
+            isLoaded = true; // Ensure proposals are only loaded once
+        }
+    }
+
+    // Coroutine to delay the loading by 5 seconds
+    IEnumerator DelayedLoadProposals()
+    {
+        // Wait for 5 seconds before starting to load proposals
+        yield return new WaitForSeconds(5f);
+
+        // Start loading proposals after the delay
+        StartCoroutine(LoadProposals());
     }
 
     IEnumerator LoadProposals()
@@ -84,7 +161,7 @@ public class TextScroller : MonoBehaviour
             }
         }
 
-        // Start updating the text content: first line after 3 seconds, then every 5 seconds
+        // Start updating the text content: first line after 1 second, then every 10 seconds
         StartCoroutine(UpdateTextContent());
 
         yield return null;
@@ -92,35 +169,25 @@ public class TextScroller : MonoBehaviour
 
     IEnumerator UpdateTextContent()
     {
-        // Wait for 3 seconds before showing the first proposal
-        yield return new WaitForSeconds(3f);
+        // Wait for 1 second before showing the first proposal
+        yield return new WaitForSeconds(1f);
 
         while (currentProposalIndex < proposals.Count)
         {
             // Fetch the next proposal
             string currentProposal = proposals[currentProposalIndex];
 
-            // Create a new Text object in the Scroll View
-            GameObject newText = Instantiate(textPrefab, contentPanel.transform);
-            newText.GetComponent<Text>().text = currentProposal;
+            // Add the proposal to the ScrollRect
+            AddTextToScrollRect(currentProposal);
 
-            // Force the ScrollRect to scroll to the bottom
-            Canvas.ForceUpdateCanvases(); // Force an update to the layout before adjusting the scroll position
-            scrollRect.verticalNormalizedPosition = 0f; // 0 means bottom, 1 means top
+            // Ensure the ScrollRect scrolls to the bottom after adding each proposal
+            ScrollToBottom();
 
-            // Add blank lines after each proposal
-            GameObject blankLine1 = Instantiate(textPrefab, contentPanel.transform);
-            blankLine1.GetComponent<Text>().text = "";
-
-            GameObject blankLine2 = Instantiate(textPrefab, contentPanel.transform);
-            blankLine2.GetComponent<Text>().text = "";
-
-            // Wait 5 seconds before displaying the next proposal
-            yield return new WaitForSeconds(5f);
+            // Wait 10 seconds before displaying the next proposal
+            yield return new WaitForSeconds(10f);
 
             // Update the proposal index
             currentProposalIndex++;
         }
     }
 }
-
