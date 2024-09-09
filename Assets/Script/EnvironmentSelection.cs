@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.EventSystems;
+using UnityEngine.Networking;  // 用于发送HTTP请求
+using System.Collections;
 
 public class EnvironmentSelection : MonoBehaviour
 {
@@ -116,15 +118,52 @@ public class EnvironmentSelection : MonoBehaviour
 
     void OnNextClicked()
     {
+        string jsonData = "";
+
         if (selectedButton == button1)
         {
+            // 选中第一个按钮
             gameObject1.SetActive(true);
             gameObject2.SetActive(false);
+
+            // 设置 JSON 数据
+            jsonData = "{\"environment\": \"panopticon\"}";
         }
         else if (selectedButton == button2)
         {
+            // 选中第二个按钮
             gameObject1.SetActive(false);
             gameObject2.SetActive(true);
+
+            // 设置 JSON 数据
+            jsonData = "{\"environment\": \"park with green land\"}";
+        }
+
+        // 启动协程发送POST请求
+        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData));
+    }
+
+    // 使用 UnityWebRequest 发送 POST 请求
+    IEnumerator SendPostRequest(string url, string jsonData)
+    {
+        // 创建 UnityWebRequest 对象，指定POST请求和要发送的数据
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        // 发送请求并等待响应
+        yield return request.SendWebRequest();
+
+        // 检查请求是否成功
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            Debug.LogError("Error sending POST request: " + request.error);
+        }
+        else
+        {
+            Debug.Log("POST request sent successfully! Response: " + request.downloadHandler.text);
         }
     }
 }
