@@ -16,6 +16,10 @@ public class EnvironmentSelection : MonoBehaviour
 
     void Start()
     {
+        // 准备视频以显示第一帧
+        PrepareVideo(videoPlayer1);
+        PrepareVideo(videoPlayer2);
+
         // 添加悬停和移出事件
         AddHoverEvent(button1, videoPlayer1);
         AddHoverEvent(button2, videoPlayer2);
@@ -52,6 +56,19 @@ public class EnvironmentSelection : MonoBehaviour
         trigger.triggers.Add(entryExit);
     }
 
+    // 准备视频并显示第一帧
+    void PrepareVideo(VideoPlayer videoPlayer)
+    {
+        videoPlayer.Prepare();
+        videoPlayer.prepareCompleted += OnPrepareCompleted;
+    }
+
+    // 当视频准备完成时，显示第一帧
+    void OnPrepareCompleted(VideoPlayer videoPlayer)
+    {
+        videoPlayer.Pause();  // 不播放视频，但显示第一帧
+    }
+
     void PlayVideo(VideoPlayer videoPlayer)
     {
         videoPlayer.Play();
@@ -59,7 +76,8 @@ public class EnvironmentSelection : MonoBehaviour
 
     void StopVideo(VideoPlayer videoPlayer)
     {
-        videoPlayer.Stop();
+        videoPlayer.Pause();  // 停止视频并显示当前帧
+        videoPlayer.frame = 0; // 回到第一帧
     }
 
     void SelectButton(Button button, VideoPlayer videoPlayer)
@@ -78,7 +96,9 @@ public class EnvironmentSelection : MonoBehaviour
         {
             outline = button.gameObject.AddComponent<Outline>();
         }
-        outline.effectColor = new Color(1, 1, 1, 0.1f);  // 1,1,1表示白色，0.1f表示10%不透明度
+
+        // 设置白框的颜色为白色，并将alpha值设置为0.1（10%不透明度）
+        outline.effectColor = new Color(1, 1, 1, 0.01f);  // 1,1,1表示白色，0.1f表示10%不透明度
 
         // 选中的按钮视频继续播放
         PlayVideo(videoPlayer);
