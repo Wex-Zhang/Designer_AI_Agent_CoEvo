@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking; // UnityWebRequest 需要引用的命名空间
 using System.IO;
 using Newtonsoft.Json.Linq;
 
@@ -74,6 +75,13 @@ public class TextScroller : MonoBehaviour
             {
                 // Add the user's input to the scroll rect content
                 AddTextToScrollRect(inputText);
+
+                // Create the JSON data for the HTTP request
+                JObject jsonData = new JObject();
+                jsonData["humanProposal"] = inputText;
+
+                // Start the POST request coroutine
+                StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData.ToString()));
 
                 // Clear the input field and reset the placeholder
                 inputField.text = "";
@@ -188,6 +196,30 @@ public class TextScroller : MonoBehaviour
 
             // Update the proposal index
             currentProposalIndex++;
+        }
+    }
+
+    // Coroutine to send the HTTP POST request
+    IEnumerator SendPostRequest(string url, string jsonData)
+    {
+        // Create a UnityWebRequest with the specified URL and JSON data
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        // Send the request and wait for a response
+        yield return request.SendWebRequest();
+
+        // Handle the response
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Request sent successfully: " + request.downloadHandler.text);
+        }
+        else
+        {
+            Debug.LogError("Error in sending request: " + request.error);
         }
     }
 }
