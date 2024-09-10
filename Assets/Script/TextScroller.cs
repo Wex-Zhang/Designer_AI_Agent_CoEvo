@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems; // 引入 EventSystems 以使用 EventTrigger
 using UnityEngine.Networking; // UnityWebRequest 需要引用的命名空间
 using System.IO;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,7 @@ public class TextScroller : MonoBehaviour
     public InputField inputField; // Assign the InputField here in the Inspector.
     public Text placeholderText; // Assign the placeholder text here in the Inspector.
     public Button focusButton; // Assign the Focus Button here in the Inspector.
+    public GameObject uiPanel; // Public UI Panel, assign this in the Inspector
 
     private List<string> proposals = new List<string>();
     private int currentProposalIndex = 0;
@@ -35,15 +37,22 @@ public class TextScroller : MonoBehaviour
             viewPortController.AddComponent<SphereCollider>().isTrigger = true; // Ensure it has a collider
         }
 
-        // Initially hide ScrollRect and InputField
+        // Initially hide ScrollRect, InputField, and UIPanel if assigned
         scrollRect.gameObject.SetActive(false);
         inputField.gameObject.SetActive(false);
+        if (uiPanel != null)
+        {
+            uiPanel.SetActive(false);  // Hide the panel at the beginning
+        }
 
         // Add an event listener for the InputField to handle Enter key submission
         inputField.onEndEdit.AddListener(HandleUserInput);
 
         // Add a listener for the Focus Button to start loading proposals
         focusButton.onClick.AddListener(OnFocusButtonClick);
+
+        // Add EventTrigger for InputField to show the UI panel and send JSON when it's selected
+        AddEventTriggerListener(inputField, EventTriggerType.Select, OnInputFieldSelected);
     }
 
     void Update()
@@ -66,6 +75,25 @@ public class TextScroller : MonoBehaviour
         }
     }
 
+    // Show the UI panel and slow down time when the InputField is selected
+    void OnInputFieldSelected(BaseEventData eventData)
+    {
+        // Show the UI panel if assigned
+        if (uiPanel != null)
+        {
+            uiPanel.SetActive(true);
+        }
+
+        // Send the first POST request with state="input" and humanProposal=""
+        JObject jsonData = new JObject();
+        jsonData["state"] = "input";
+        jsonData["humanProposal"] = ""; // Empty value initially
+        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData.ToString()));
+
+        // Slow down time
+        Time.timeScale = 0.01f;
+    }
+
     void HandleUserInput(string inputText)
     {
         // Handle the user's input when they press Enter
@@ -76,9 +104,10 @@ public class TextScroller : MonoBehaviour
                 // Add the user's input to the scroll rect content
                 AddTextToScrollRect(inputText);
 
-                // Create the JSON data for the HTTP request
+                // Create the JSON data for the second HTTP request
                 JObject jsonData = new JObject();
-                jsonData["humanProposal"] = inputText;
+                jsonData["state"] = "sent"; // Update state to "sent"
+                jsonData["humanProposal"] = inputText; // Send the user's input
 
                 // Start the POST request coroutine
                 StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData.ToString()));
@@ -90,6 +119,13 @@ public class TextScroller : MonoBehaviour
 
                 // Ensure the ScrollRect scrolls to the bottom
                 ScrollToBottom();
+
+                // Hide the UI panel and resume normal game speed
+                if (uiPanel != null)
+                {
+                    uiPanel.SetActive(false);
+                }
+                Time.timeScale = 1f; // Resume normal game speed
             }
         }
     }
@@ -178,7 +214,7 @@ public class TextScroller : MonoBehaviour
     IEnumerator UpdateTextContent()
     {
         // Wait for 1 second before showing the first proposal
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(10f);
 
         while (currentProposalIndex < proposals.Count)
         {
@@ -221,5 +257,19 @@ public class TextScroller : MonoBehaviour
         {
             Debug.LogError("Error in sending request: " + request.error);
         }
+    }
+
+    // Add EventTrigger to listen for a specific event type
+    private void AddEventTriggerListener(InputField input, EventTriggerType eventType, System.Action<BaseEventData> callback)
+    {
+        EventTrigger trigger = input.GetComponent<EventTrigger>();
+        if (trigger == null)
+        {
+            trigger = input.gameObject.AddComponent<EventTrigger>();
+        }
+
+        EventTrigger.Entry entry = new EventTrigger.Entry { eventID = eventType };
+        entry.callback.AddListener((eventData) => { callback.Invoke(eventData); });
+        trigger.triggers.Add(entry);
     }
 }

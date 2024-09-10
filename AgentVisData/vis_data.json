@@ -22,7 +22,7 @@
     {
       "name": "Sally",
       "age": 30,
-      "traits": "CURIOUS,CRITICAL,ENVIRONMENTAL SCIENTIST1",
+      "traits": "CURIOUS,CRITICAL,ENVIRONMENTAL SCIENTIST",
       "status": "dive into books about bio-design",
       "initial_memory": [
         "Sally has been researching the impact of urbanization on local ecosystems.",

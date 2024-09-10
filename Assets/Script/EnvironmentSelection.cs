@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.EventSystems;
-using UnityEngine.Networking;  // 用于发送HTTP请求
+using UnityEngine.Networking;
 using System.Collections;
 
 public class EnvironmentSelection : MonoBehaviour
@@ -13,8 +13,12 @@ public class EnvironmentSelection : MonoBehaviour
     public VideoPlayer videoPlayer2;
     public GameObject gameObject1;
     public GameObject gameObject2;
+    public Image image1; // 第一个 Image
+    public Image image2; // 第二个 Image
     public Button nextButton;
     private Button selectedButton;
+    private Coroutine image1FadeCoroutine;
+    private Coroutine image2FadeCoroutine;
 
     void Start()
     {
@@ -23,36 +27,51 @@ public class EnvironmentSelection : MonoBehaviour
         PrepareVideo(videoPlayer2);
 
         // 添加悬停和移出事件
-        AddHoverEvent(button1, videoPlayer1);
-        AddHoverEvent(button2, videoPlayer2);
+        AddHoverEvent(button1, videoPlayer1, image1);
+        AddHoverEvent(button2, videoPlayer2, image2);
 
         // 添加点击事件
-        button1.onClick.AddListener(() => SelectButton(button1, videoPlayer1));
-        button2.onClick.AddListener(() => SelectButton(button2, videoPlayer2));
+        button1.onClick.AddListener(() => SelectButton(button1, videoPlayer1, image1));
+        button2.onClick.AddListener(() => SelectButton(button2, videoPlayer2, image2));
 
         // Next按钮事件
         nextButton.onClick.AddListener(OnNextClicked);
+
+        // 初始化 image 的透明度
+        SetImageAlpha(image1, 0.4f);
+        SetImageAlpha(image2, 0.4f);
     }
 
-    void AddHoverEvent(Button button, VideoPlayer videoPlayer)
+    void AddHoverEvent(Button button, VideoPlayer videoPlayer, Image image)
     {
         EventTrigger trigger = button.gameObject.AddComponent<EventTrigger>();
 
-        // 悬停事件：播放视频
+        // 悬停事件：播放视频和淡出图片
         EventTrigger.Entry entryHover = new EventTrigger.Entry();
         entryHover.eventID = EventTriggerType.PointerEnter;
-        entryHover.callback.AddListener((eventData) => PlayVideo(videoPlayer));
+        entryHover.callback.AddListener((eventData) =>
+        {
+            PlayVideo(videoPlayer);
+            if (selectedButton != button)
+            {
+                if (image == image1 && image1FadeCoroutine != null) StopCoroutine(image1FadeCoroutine);
+                if (image == image2 && image2FadeCoroutine != null) StopCoroutine(image2FadeCoroutine);
+                StartCoroutine(FadeImage(image, 0f, 0.5f));
+            }
+        });
         trigger.triggers.Add(entryHover);
 
-        // 鼠标移出事件：停止视频
+        // 鼠标移出事件：停止视频和恢复图片透明度
         EventTrigger.Entry entryExit = new EventTrigger.Entry();
         entryExit.eventID = EventTriggerType.PointerExit;
         entryExit.callback.AddListener((eventData) =>
         {
-            // 如果当前按钮没有被选中，移出后停止视频
             if (selectedButton != button)
             {
                 StopVideo(videoPlayer);
+                if (image == image1 && image1FadeCoroutine != null) StopCoroutine(image1FadeCoroutine);
+                if (image == image2 && image2FadeCoroutine != null) StopCoroutine(image2FadeCoroutine);
+                StartCoroutine(FadeImage(image, 0.4f, 0.5f));
             }
         });
         trigger.triggers.Add(entryExit);
@@ -82,13 +101,17 @@ public class EnvironmentSelection : MonoBehaviour
         videoPlayer.frame = 0; // 回到第一帧
     }
 
-    void SelectButton(Button button, VideoPlayer videoPlayer)
+    void SelectButton(Button button, VideoPlayer videoPlayer, Image image)
     {
         // 清除之前的白框和视频播放
         if (selectedButton != null && selectedButton != button)
         {
             DeselectButton(selectedButton);
             StopVideo(selectedButton == button1 ? videoPlayer1 : videoPlayer2);
+            if (selectedButton == button1)
+                image1FadeCoroutine = StartCoroutine(FadeImage(image1, 0.4f, 0.5f));
+            else if (selectedButton == button2)
+                image2FadeCoroutine = StartCoroutine(FadeImage(image2, 0.4f, 0.5f));
         }
 
         // 选中当前按钮并显示白框
@@ -98,12 +121,13 @@ public class EnvironmentSelection : MonoBehaviour
         {
             outline = button.gameObject.AddComponent<Outline>();
         }
-
-        // 设置白框的颜色为白色，并将alpha值设置为0.1（10%不透明度）
-        outline.effectColor = new Color(1, 1, 1, 0.01f);  // 1,1,1表示白色，0.1f表示10%不透明度
+        outline.effectColor = new Color(1, 1, 1, 0.01f);  // 白框颜色
 
         // 选中的按钮视频继续播放
         PlayVideo(videoPlayer);
+
+        // 选中时图像透明度保持为0
+        StartCoroutine(FadeImage(image, 0f, 0.5f));
     }
 
     void DeselectButton(Button button)
@@ -146,17 +170,14 @@ public class EnvironmentSelection : MonoBehaviour
     // 使用 UnityWebRequest 发送 POST 请求
     IEnumerator SendPostRequest(string url, string jsonData)
     {
-        // 创建 UnityWebRequest 对象，指定POST请求和要发送的数据
         UnityWebRequest request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        // 发送请求并等待响应
         yield return request.SendWebRequest();
 
-        // 检查请求是否成功
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             Debug.LogError("Error sending POST request: " + request.error);
@@ -165,5 +186,30 @@ public class EnvironmentSelection : MonoBehaviour
         {
             Debug.Log("POST request sent successfully! Response: " + request.downloadHandler.text);
         }
+    }
+
+    // 设置 Image 的透明度
+    void SetImageAlpha(Image image, float alpha)
+    {
+        Color color = image.color;
+        color.a = alpha;
+        image.color = color;
+    }
+
+    // 淡入淡出效果的协程
+    IEnumerator FadeImage(Image image, float targetAlpha, float duration)
+    {
+        float startAlpha = image.color.a;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
+            SetImageAlpha(image, alpha);
+            yield return null;
+        }
+
+        SetImageAlpha(image, targetAlpha);
     }
 }
