@@ -15810,7 +15810,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0942b6706f2de72469ba2a1150a1ea9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  filePaths: []
+  filePaths:
+  - Assets/Agents_Data/character1.json
+  - Assets/Agents_Data/character2.json
+  - Assets/Agents_Data/character3.json
   dialogueDataList: []
   dialogueBubbles:
   - {fileID: 935952888}
