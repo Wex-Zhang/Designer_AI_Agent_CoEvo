@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 public class InputFieldManager : MonoBehaviour
 {
     public InputField inputField; // 引用你的InputField
     private string jsonFilePath;
-    private TopicData topicData;
+    private Dictionary<string, object> jsonData; // 用于存储整个JSON对象
     private string previousContent;
     private string spaces = "                              "; // 固定空格
     private bool isInitialized = false; // 标记是否已经初始化过空格
@@ -28,13 +30,20 @@ public class InputFieldManager : MonoBehaviour
     {
         if (File.Exists(jsonFilePath))
         {
-            string jsonData = File.ReadAllText(jsonFilePath);
-            topicData = JsonUtility.FromJson<TopicData>(jsonData);
+            string jsonContent = File.ReadAllText(jsonFilePath);
+            jsonData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
 
-            // 将读取到的内容设置到InputField中，添加空格并转换为大写
-            previousContent = topicData.original_topic.ToUpper();
-            inputField.text = spaces + previousContent;
-            isInitialized = true;
+            // 读取 "original_topic" 并将其转换为大写
+            if (jsonData.ContainsKey("original_topic"))
+            {
+                previousContent = jsonData["original_topic"].ToString().ToUpper();
+                inputField.text = spaces + previousContent;
+                isInitialized = true;
+            }
+            else
+            {
+                Debug.LogError("The key 'original_topic' was not found in the JSON file.");
+            }
         }
         else
         {
@@ -75,20 +84,19 @@ public class InputFieldManager : MonoBehaviour
 
     void UpdateJson(string newContent)
     {
-        // 更新JSON对象中的内容
-        topicData.original_topic = newContent;
+        // 更新JSON中的 "original_topic"
+        if (jsonData != null && jsonData.ContainsKey("original_topic"))
+        {
+            // 将输入内容转换为小写并写入JSON文件
+            string contentToWrite = newContent.ToLower();
+            jsonData["original_topic"] = contentToWrite;
 
-        // 将更新后的内容写回JSON文件
-        string updatedJson = JsonUtility.ToJson(topicData, true);
-        File.WriteAllText(jsonFilePath, updatedJson);
+            // 将更新后的JSON写回文件，不会覆盖其他字段
+            string updatedJson = JsonConvert.SerializeObject(jsonData, Formatting.Indented);
+            File.WriteAllText(jsonFilePath, updatedJson);
 
-        // 更新previousContent为当前内容
-        previousContent = newContent;
+            // 更新previousContent为当前内容（保持大写显示）
+            previousContent = newContent;
+        }
     }
-}
-
-[System.Serializable]
-public class TopicData
-{
-    public string original_topic;
 }

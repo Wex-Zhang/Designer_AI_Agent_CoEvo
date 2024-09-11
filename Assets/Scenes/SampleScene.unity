@@ -10327,6 +10327,7 @@ GameObject:
   - component: {fileID: 454278169}
   - component: {fileID: 454278168}
   - component: {fileID: 454278170}
+  - component: {fileID: 454278171}
   m_Layer: 0
   m_Name: ScriptCarrier
   m_TagString: Untagged
@@ -10391,6 +10392,19 @@ MonoBehaviour:
   image1: {fileID: 1270059471}
   image2: {fileID: 1522398005}
   nextButton: {fileID: 1335820437}
+--- !u!114 &454278171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454278167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e94dfc45d2a974459f2c4357f98926a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sendPostButton: {fileID: 463091197}
 --- !u!1 &455472512
 GameObject:
   m_ObjectHideFlags: 0

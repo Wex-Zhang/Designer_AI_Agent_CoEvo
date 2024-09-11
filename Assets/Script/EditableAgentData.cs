@@ -81,33 +81,36 @@ public class AgentInfoHandler : MonoBehaviour
 
     void OnInputFieldEdited(string userInput, int fieldIndex)
     {
-        // Convert user input to uppercase
+        // Convert user input to uppercase for display
         string uppercasedInput = userInput.ToUpper();
         inputFields[fieldIndex].text = uppercasedInput;
 
-        // Update the corresponding JSON field with the new input
+        // Convert user input to lowercase for saving to JSON
+        string lowercasedInput = userInput.ToLower();
+
+        // Update the corresponding JSON field with the new input (lowercase)
         if (agentsData != null)
         {
             if (fieldIndex == 0)
             {
-                agentsData["agents"][agentIndex]["name"] = uppercasedInput;
+                agentsData["agents"][agentIndex]["name"] = lowercasedInput;
             }
             else if (fieldIndex == 1)
             {
-                agentsData["agents"][agentIndex]["age"] = uppercasedInput;
+                agentsData["agents"][agentIndex]["age"] = lowercasedInput;
             }
             else if (fieldIndex == 2)
             {
-                agentsData["agents"][agentIndex]["traits"] = uppercasedInput;
+                agentsData["agents"][agentIndex]["traits"] = lowercasedInput;
             }
             else if (fieldIndex == 3)
             {
-                agentsData["agents"][agentIndex]["status"] = uppercasedInput;
+                agentsData["agents"][agentIndex]["status"] = lowercasedInput;
             }
             else if (fieldIndex == 4)
             {
                 // Split the input back into the initial_memory array
-                string[] splitInput = uppercasedInput.Split(new[] { "\n\n" }, System.StringSplitOptions.None);
+                string[] splitInput = lowercasedInput.Split(new[] { "\n\n" }, System.StringSplitOptions.None);
                 JArray updatedMemoryArray = new JArray();
                 foreach (string memory in splitInput)
                 {
