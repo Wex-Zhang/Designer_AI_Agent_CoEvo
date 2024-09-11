@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 public class InputFieldManager : MonoBehaviour
 {
     public InputField inputField; // 引用你的InputField
-    private string jsonFilePath;
+    public string jsonFilePath; // JSON文件路径，可以在Inspector中编辑
     private Dictionary<string, object> jsonData; // 用于存储整个JSON对象
     private string previousContent;
     private string spaces = "                              "; // 固定空格
@@ -15,8 +15,11 @@ public class InputFieldManager : MonoBehaviour
 
     void Start()
     {
-        // 定义JSON文件的路径（在Assets文件夹中）
-        jsonFilePath = Path.Combine(Application.dataPath, "../AgentVisData/vis_data.json");
+        // 如果没有在Inspector中设置路径，则使用默认路径
+        if (string.IsNullOrEmpty(jsonFilePath))
+        {
+            jsonFilePath = Path.Combine(Application.dataPath, "../AgentVisData/vis_data.json");
+        }
 
         // 读取并解析JSON文件
         LoadJson();

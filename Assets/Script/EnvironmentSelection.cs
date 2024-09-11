@@ -22,14 +22,11 @@ public class EnvironmentSelection : MonoBehaviour
     private Coroutine image1FadeCoroutine;
     private Coroutine image2FadeCoroutine;
 
-    // JSON 文件路径
-    private string jsonFilePath;
+    // 使 jsonFilePath 成为公有变量，可以在 Inspector 中编辑
+    public string jsonFilePath = "C:/Users/Wex/Documents/GitHub/Langchain_Agent_Test/generative_agents_ollama/data.json";
 
     void Start()
     {
-        // 设置JSON文件路径
-        jsonFilePath = Path.Combine(Application.dataPath, "../AgentVisData/vis_data.json");
-
         // 准备视频以显示第一帧
         PrepareVideo(videoPlayer1);
         PrepareVideo(videoPlayer2);

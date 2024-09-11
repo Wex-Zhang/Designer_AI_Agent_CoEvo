@@ -2712,6 +2712,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputField: {fileID: 107329581}
+  jsonFilePath: C:\Users\Wex\Documents\GitHub\Langchain_Agent_Test\generative_agents_ollama\data.json
 --- !u!114 &107329586
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10347,7 +10348,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cde74fa6cb05ea4aa9cf365b70d9bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jsonFilePath: C:/Users/17599/Documents/GitHub/ucl-DFPI/Langchain_Agent_Test/generative_agents_ollama/data.json
+  jsonFilePath: C:\Users\Wex\Documents\GitHub\Langchain_Agent_Test\generative_agents_ollama\data.json
   contentPanel: {fileID: 1103528780}
   textPrefab: {fileID: 1334172888}
   scrollRect: {fileID: 800420077}
@@ -10392,6 +10393,7 @@ MonoBehaviour:
   image1: {fileID: 1270059471}
   image2: {fileID: 1522398005}
   nextButton: {fileID: 1335820437}
+  jsonFilePath: C:\Users\Wex\Documents\GitHub\Langchain_Agent_Test\generative_agents_ollama\data.json
 --- !u!114 &454278171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20824,6 +20826,8 @@ MonoBehaviour:
   inputField: {fileID: 1675990804}
   moveSpeed: 3
   rotateSpeed: 3
+  serverIp: 127.0.0.1
+  serverPort: 3000
 --- !u!1001 &964766514
 PrefabInstance:
   m_ObjectHideFlags: 0
