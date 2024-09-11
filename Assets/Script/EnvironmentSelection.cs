@@ -4,6 +4,8 @@ using UnityEngine.Video;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using System.Collections;
+using System.IO;
+using Newtonsoft.Json.Linq;
 
 public class EnvironmentSelection : MonoBehaviour
 {
@@ -20,8 +22,14 @@ public class EnvironmentSelection : MonoBehaviour
     private Coroutine image1FadeCoroutine;
     private Coroutine image2FadeCoroutine;
 
+    // JSON 文件路径
+    private string jsonFilePath;
+
     void Start()
     {
+        // 设置JSON文件路径
+        jsonFilePath = Path.Combine(Application.dataPath, "../AgentVisData/vis_data.json");
+
         // 准备视频以显示第一帧
         PrepareVideo(videoPlayer1);
         PrepareVideo(videoPlayer2);
@@ -142,7 +150,7 @@ public class EnvironmentSelection : MonoBehaviour
 
     void OnNextClicked()
     {
-        string jsonData = "";
+        string environmentText = "";
 
         if (selectedButton == button1)
         {
@@ -150,8 +158,8 @@ public class EnvironmentSelection : MonoBehaviour
             gameObject1.SetActive(true);
             gameObject2.SetActive(false);
 
-            // 设置 JSON 数据
-            jsonData = "{\"environment\": \"panopticon\"}";
+            // 修改 JSON 文件中 environment 的值
+            environmentText = "The environment agents staying at is panopticon";
         }
         else if (selectedButton == button2)
         {
@@ -159,32 +167,36 @@ public class EnvironmentSelection : MonoBehaviour
             gameObject1.SetActive(false);
             gameObject2.SetActive(true);
 
-            // 设置 JSON 数据
-            jsonData = "{\"environment\": \"park with green land\"}";
+            // 修改 JSON 文件中 environment 的值
+            environmentText = "The environment agents staying at is park";
         }
 
-        // 启动协程发送POST请求
-        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData));
+        // 调用方法修改 JSON 文件
+        ModifyJsonFile(environmentText);
     }
 
-    // 使用 UnityWebRequest 发送 POST 请求
-    IEnumerator SendPostRequest(string url, string jsonData)
+    // 修改 JSON 文件中的 environment 字段
+    void ModifyJsonFile(string environmentText)
     {
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        if (File.Exists(jsonFilePath))
         {
-            Debug.LogError("Error sending POST request: " + request.error);
+            // 读取 JSON 文件
+            string jsonContent = File.ReadAllText(jsonFilePath);
+
+            // 使用 JObject 解析 JSON
+            JObject jsonObj = JObject.Parse(jsonContent);
+
+            // 修改 environment 字段
+            jsonObj["environment"] = environmentText;
+
+            // 将修改后的 JSON 保存回文件
+            File.WriteAllText(jsonFilePath, jsonObj.ToString());
+
+            Debug.Log("JSON 文件已更新: " + jsonFilePath);
         }
         else
         {
-            Debug.Log("POST request sent successfully! Response: " + request.downloadHandler.text);
+            Debug.LogError("JSON 文件未找到: " + jsonFilePath);
         }
     }
 

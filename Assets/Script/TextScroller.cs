@@ -51,7 +51,7 @@ public class TextScroller : MonoBehaviour
         // Add a listener for the Focus Button to start loading proposals
         focusButton.onClick.AddListener(OnFocusButtonClick);
 
-        // Add EventTrigger for InputField to show the UI panel and send JSON when it's selected
+        // Add EventTrigger for InputField to show the UI panel when it's selected (no HTTP request here)
         AddEventTriggerListener(inputField, EventTriggerType.Select, OnInputFieldSelected);
     }
 
@@ -75,7 +75,7 @@ public class TextScroller : MonoBehaviour
         }
     }
 
-    // Show the UI panel and slow down time when the InputField is selected
+    // Show the UI panel when the InputField is selected
     void OnInputFieldSelected(BaseEventData eventData)
     {
         // Show the UI panel if assigned
@@ -84,13 +84,7 @@ public class TextScroller : MonoBehaviour
             uiPanel.SetActive(true);
         }
 
-        // Send the first POST request with state="input" and humanProposal=""
-        JObject jsonData = new JObject();
-        jsonData["state"] = "input";
-        jsonData["humanProposal"] = ""; // Empty value initially
-        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData.ToString()));
-
-        // Slow down time
+        // Slow down time (optional if required)
         Time.timeScale = 0.01f;
     }
 
@@ -104,10 +98,10 @@ public class TextScroller : MonoBehaviour
                 // Add the user's input to the scroll rect content
                 AddTextToScrollRect(inputText);
 
-                // Create the JSON data for the second HTTP request
+                // Create the new JSON data structure
                 JObject jsonData = new JObject();
-                jsonData["state"] = "sent"; // Update state to "sent"
-                jsonData["humanProposal"] = inputText; // Send the user's input
+                jsonData["command"] = "chat_in_round"; // New "command" field
+                jsonData["content"] = inputText; // New "content" field with user's input
 
                 // Start the POST request coroutine
                 StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData.ToString()));

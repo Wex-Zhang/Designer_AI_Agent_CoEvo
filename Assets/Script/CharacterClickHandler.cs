@@ -70,10 +70,6 @@ public class CharacterInteraction : MonoBehaviour
 
                         // 开始移动摄像头
                         isMoving = true;
-
-                        // 发送初始的JSON请求，state为"input"，其他为空
-                        SendInitialRequest();
-
                         break;
                     }
                 }
@@ -117,19 +113,8 @@ public class CharacterInteraction : MonoBehaviour
                 cameraTransform.position = targetPosition;
                 cameraTransform.rotation = targetRotation;
                 isMovingBack = false;
-
             }
         }
-    }
-
-    // 发送初始的空JSON请求
-    void SendInitialRequest()
-    {
-        // 创建初始JSON数据
-        string jsonData = "{\"state\": \"input\", \"num\": \"" + AgentNum + "\", \"word\": \"\"}";
-
-        // 启动协程发送POST请求
-        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData));
     }
 
     // 当点击发送数据按钮时，发送完整的JSON数据
@@ -139,7 +124,7 @@ public class CharacterInteraction : MonoBehaviour
         string userInput = inputField.text.Trim();
 
         // 创建最终的JSON数据
-        string jsonData = "{\"state\": \"sent\", \"num\": \"" + AgentNum + "\", \"word\": \"" + userInput + "\"}";
+        string jsonData = "{\"command\": \"add_memory\", \"content\": {\"agent_number\": \"" + AgentNum + "\", \"memory\": \"" + userInput + "\"}}";
 
         // 启动协程发送POST请求
         StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData));
