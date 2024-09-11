@@ -1,59 +1,53 @@
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
-using System.Collections;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
-public class postStartCommand : MonoBehaviour
+public class PostStartCommand : MonoBehaviour
 {
-    // 按钮对象
+    // Button reference
     public Button sendPostButton;
+    
+    // IP address and port of the server
+    public string serverIP = "127.0.0.1";  // Change this to your server's IP
+    public int serverPort = 3000;          // Change this to your server's port
 
     void Start()
     {
-        // 为按钮添加点击事件监听器
+        // Attach the button click listener
         sendPostButton.onClick.AddListener(OnSendPostButtonClick);
     }
 
-    // 按钮点击事件
+    // Button click event
     void OnSendPostButtonClick()
     {
-        // 创建要发送的JSON数据
+        // JSON data to be sent
         string jsonData = "{\"command\":\"start\"}";
 
-        // 启动协程发送POST请求
-        StartCoroutine(SendPostRequest("http://localhost:3000/api/receive-data", jsonData));
+        // Send the JSON data via UDP
+        SendUdpRequest(serverIP, serverPort, jsonData);
     }
 
-    // 协程发送POST请求
-    IEnumerator SendPostRequest(string url, string jsonData)
+    // Function to send data via UDP
+    void SendUdpRequest(string ipAddress, int port, string jsonData)
     {
-        // 将JSON数据转为字节数组
-        byte[] jsonToSend = new UTF8Encoding().GetBytes(jsonData);
-
-        // 创建UnityWebRequest对象
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-
-        // 设置上传的数据
-        request.uploadHandler = new UploadHandlerRaw(jsonToSend);
-
-        // 设置接收的数据
-        request.downloadHandler = new DownloadHandlerBuffer();
-
-        // 设置请求头中的内容类型为application/json
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        // 发送请求并等待响应
-        yield return request.SendWebRequest();
-
-        // 检查请求是否有错误
-        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        try
         {
-            Debug.LogError("请求失败: " + request.error);
+            // Convert the JSON string to bytes
+            byte[] data = Encoding.UTF8.GetBytes(jsonData);
+
+            // Create a UDP client
+            UdpClient udpClient = new UdpClient();
+
+            // Send the data to the specified IP and port
+            udpClient.Send(data, data.Length, ipAddress, port);
+
+            Debug.Log("Data sent successfully via UDP.");
         }
-        else
+        catch (SocketException ex)
         {
-            Debug.Log("请求成功: " + request.downloadHandler.text);
+            Debug.LogError("UDP send failed: " + ex.Message);
         }
     }
 }

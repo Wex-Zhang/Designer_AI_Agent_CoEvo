@@ -10347,7 +10347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cde74fa6cb05ea4aa9cf365b70d9bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jsonFilePath: ../AgentVisData/vis_data.json
+  jsonFilePath: C:/Users/17599/Documents/GitHub/ucl-DFPI/Langchain_Agent_Test/generative_agents_ollama/data.json
   contentPanel: {fileID: 1103528780}
   textPrefab: {fileID: 1334172888}
   scrollRect: {fileID: 800420077}
@@ -10405,6 +10405,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sendPostButton: {fileID: 463091197}
+  serverIP: 127.0.0.1
+  serverPort: 3000
 --- !u!1 &455472512
 GameObject:
   m_ObjectHideFlags: 0
