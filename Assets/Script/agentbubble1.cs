@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [System.Serializable]
 public class DialogueData
 {
-    public string dialogue;
+    public string compressed_proposal;
 }
 
 public class agentbubble1 : MonoBehaviour
@@ -21,15 +21,24 @@ public class agentbubble1 : MonoBehaviour
     private int clickCount = 0; // 跟踪点击次数
     private bool areBubblesVisible = false; // 当前气泡的显示状态
     private Coroutine dialogueSequenceCoroutine; // 用于控制气泡显示的协程
+    private int display_num = 0; // 当前 runtime 索引
+    private Coroutine incrementDisplayNumCoroutine; // 用于周期性更新 runtime 索引的协程
 
     private void Start()
     {
         dialogueDataList = new List<DialogueData>();
+        // 更新 JSON 文件路径
+        filePaths = new List<string> 
+        {
+            @"C:\Users\17599\Downloads\data 1.json"
+        };
         foreach (string filePath in filePaths)
         {
             ReadJson(filePath);
         }
         HideAllBubbles(); // 初始隐藏所有气泡
+        StartCoroutine(IncrementDisplayNum());
+        StartCoroutine(UpdateBubbleContents());
     }
 
     private void ReadJson(string filePath)
@@ -37,12 +46,43 @@ public class agentbubble1 : MonoBehaviour
         if (File.Exists(filePath))
         {
             string json = File.ReadAllText(filePath);
-            DialogueData dialogueData = JsonUtility.FromJson<DialogueData>(json);
-            dialogueDataList.Add(dialogueData);
+            var data = JsonUtility.FromJson<RootObject>(json);
+            UpdateDialogueData(data);
         }
         else
         {
             Debug.LogError($"找不到文件: {filePath}");
+        }
+    }
+
+    private void UpdateDialogueData(RootObject data)
+    {
+        dialogueDataList.Clear();
+        if (data.runtime != null && display_num < data.runtime.Count)
+        {
+            var runtime = data.runtime[display_num];
+            dialogueDataList.Clear();
+            if (runtime.proposals != null && runtime.proposals.Count >= 3)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    dialogueDataList.Add(new DialogueData { compressed_proposal = runtime.proposals[i].compressed_proposal });
+                }
+            }
+        }
+    }
+
+    private IEnumerator IncrementDisplayNum()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(30f);
+            display_num++;
+            foreach (string filePath in filePaths)
+            {
+                ReadJson(filePath);
+            }
+            // Remove the need to manually update bubble contents here
         }
     }
 
@@ -59,7 +99,7 @@ public class agentbubble1 : MonoBehaviour
         if (index < dialogueBubbles.Count && index < dialogueDataList.Count)
         {
             dialogueBubbles[index].SetActive(true);
-            dialogueBubbles[index].GetComponentInChildren<Text>().text = dialogueDataList[index].dialogue;
+            dialogueBubbles[index].GetComponentInChildren<Text>().text = dialogueDataList[index].compressed_proposal;
             StartCoroutine(TrackObject(index));
         }
     }
@@ -84,6 +124,10 @@ public class agentbubble1 : MonoBehaviour
             {
                 areBubblesVisible = true;
                 dialogueSequenceCoroutine = StartCoroutine(ShowDialogueSequence());
+                if (incrementDisplayNumCoroutine == null)
+                {
+                    incrementDisplayNumCoroutine = StartCoroutine(IncrementDisplayNum());
+                }
             }
         }
         else // Even number of clicks
@@ -95,6 +139,11 @@ public class agentbubble1 : MonoBehaviour
                 if (dialogueSequenceCoroutine != null)
                 {
                     StopCoroutine(dialogueSequenceCoroutine); // 停止气泡显示的协程
+                }
+                if (incrementDisplayNumCoroutine != null)
+                {
+                    StopCoroutine(incrementDisplayNumCoroutine);
+                    incrementDisplayNumCoroutine = null;
                 }
             }
         }
@@ -115,4 +164,53 @@ public class agentbubble1 : MonoBehaviour
         HideAllBubbles();
         areBubblesVisible = false; // 将状态重置
     }
+
+    private IEnumerator UpdateBubbleContents()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1f); // Check every second
+            if (areBubblesVisible)
+            {
+                for (int i = 0; i < dialogueBubbles.Count; i++)
+                {
+                    if (i < dialogueDataList.Count)
+                    {
+                        UpdateBubbleContent(i);
+                    }
+                }
+            }
+        }
+    }
+
+    private void UpdateBubbleContent(int index)
+    {
+        if (index < dialogueBubbles.Count && index < dialogueDataList.Count)
+        {
+            Text bubbleText = dialogueBubbles[index].GetComponentInChildren<Text>();
+            if (bubbleText.text != dialogueDataList[index].compressed_proposal)
+            {
+                bubbleText.text = dialogueDataList[index].compressed_proposal;
+            }
+        }
+    }
+}
+
+// 添加用于解析 JSON 的类
+[System.Serializable]
+public class Proposal
+{
+    public string compressed_proposal;
+}
+
+[System.Serializable]
+public class Runtime
+{
+    public List<Proposal> proposals;
+}
+
+[System.Serializable]
+public class RootObject
+{
+    public List<Runtime> runtime;
 }
